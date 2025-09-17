@@ -25,6 +25,8 @@ interface ChatInterfaceProps {
   debugMode?: boolean;
   onToggleDebug?: () => void;
   onTakePhoto?: () => void;
+  capturedImage?: File | null;
+  onClearCapturedImage?: () => void;
 }
 
 export function ChatInterface({ 
@@ -32,7 +34,9 @@ export function ChatInterface({
   deviceId,
   debugMode = false, 
   onToggleDebug, 
-  onTakePhoto 
+  onTakePhoto,
+  capturedImage,
+  onClearCapturedImage
 }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -41,12 +45,18 @@ export function ChatInterface({
   const { messages, loading, sending, sendMessage } = useChat(deviceId, isAuthenticated);
 
   const handleSend = async () => {
-    if (!message.trim() && images.length === 0) return;
+    const allImages = [...images];
+    if (capturedImage) {
+      allImages.push(capturedImage);
+    }
     
-    await sendMessage(message, images, debugMode);
+    if (!message.trim() && allImages.length === 0) return;
+    
+    await sendMessage(message, allImages, debugMode);
     
     setMessage("");
     setImages([]);
+    onClearCapturedImage?.();
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,8 +100,21 @@ export function ChatInterface({
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((msg) => (
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-3">
+                <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded animate-pulse" />
+                  <div className="h-16 bg-muted rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((msg) => (
             <div key={msg.id} className="space-y-2">
               <div className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[70%] ${msg.role === 'user' ? 'order-2' : ''}`}>
@@ -158,13 +181,14 @@ export function ChatInterface({
               )}
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </ScrollArea>
 
       {/* Input Area */}
       <div className="p-4 border-t space-y-3">
         {/* Image Previews */}
-        {images.length > 0 && (
+        {(images.length > 0 || capturedImage) && (
           <div className="flex gap-2">
             {images.map((img, index) => (
               <div key={index} className="relative">
@@ -184,6 +208,27 @@ export function ChatInterface({
                 </Button>
               </div>
             ))}
+            {capturedImage && (
+              <div className="relative">
+                <img
+                  src={URL.createObjectURL(capturedImage)}
+                  alt="Camera capture"
+                  className="h-16 w-16 object-cover rounded border border-primary"
+                />
+                <Badge className="absolute -top-1 -right-1 h-5 px-1 text-xs bg-primary" aria-label="Camera captured image">
+                  <Camera className="h-3 w-3" />
+                </Badge>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-5 w-5"
+                  onClick={onClearCapturedImage}
+                  data-testid="button-remove-captured-image"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
         
@@ -237,12 +282,15 @@ export function ChatInterface({
           
           <Button
             onClick={handleSend}
-            disabled={!deviceConnected || (!message.trim() && images.length === 0) || sending}
+            disabled={!deviceConnected || (!message.trim() && images.length === 0 && !capturedImage) || sending}
             className="self-end"
             data-testid="button-send-message"
           >
             {sending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Sending...
+              </>
             ) : (
               <Send className="h-4 w-4" />
             )}

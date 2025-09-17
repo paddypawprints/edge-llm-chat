@@ -12,23 +12,14 @@ interface ChatProps {
 export default function Chat({ deviceConnected = false, connectedDeviceId }: ChatProps) {
   const [debugMode, setDebugMode] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-
-  const handleSendMessage = (message: string, images?: File[]) => {
-    // todo: remove mock functionality - simulate sending to edge device
-    console.log('Sending to edge device:', {
-      message,
-      imageCount: images?.length || 0,
-      debugMode
-    });
-  };
+  const [capturedImage, setCapturedImage] = useState<File | null>(null);
 
   const handleTakePhoto = () => {
     setShowCamera(true);
   };
 
   const handleCameraCapture = (imageFile: File) => {
-    console.log('Photo captured:', imageFile.name);
-    // todo: remove mock functionality - add to chat automatically
+    setCapturedImage(imageFile);
     setShowCamera(false);
   };
 
@@ -48,6 +39,8 @@ export default function Chat({ deviceConnected = false, connectedDeviceId }: Cha
           debugMode={debugMode}
           onToggleDebug={() => setDebugMode(!debugMode)}
           onTakePhoto={handleTakePhoto}
+          capturedImage={capturedImage}
+          onClearCapturedImage={() => setCapturedImage(null)}
         />
       </div>
 

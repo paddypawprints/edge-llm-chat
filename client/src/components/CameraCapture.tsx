@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +101,15 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     setCapturedImage(null);
   }, []);
 
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -116,7 +125,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
                 Recording
               </Badge>
             )}
-            <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-camera">
+            <Button variant="ghost" size="icon" onClick={() => { stopCamera(); onClose?.(); }} data-testid="button-close-camera">
               <X className="h-4 w-4" />
             </Button>
           </div>
