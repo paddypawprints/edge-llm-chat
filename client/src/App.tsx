@@ -13,6 +13,7 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Devices from "@/pages/Devices";
 import Chat from "@/pages/Chat";
+import Admin from "@/pages/Admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -46,6 +47,13 @@ function Router() {
           <Route path="/chat">
             {isAuthenticated ? (
               <Chat deviceConnected={!!connectedDevice} connectedDeviceId={connectedDevice} />
+            ) : (
+              <Login onLogin={login} onOIDCLogin={oidcLogin} />
+            )}
+          </Route>
+          <Route path="/admin">
+            {isAuthenticated ? (
+              <Admin />
             ) : (
               <Login onLogin={login} onOIDCLogin={oidcLogin} />
             )}

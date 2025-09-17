@@ -46,6 +46,14 @@ export function Navigation({ isAuthenticated = false, deviceConnected = false, o
                     Chat
                   </Button>
                 </Link>
+                <Link href="/admin" data-testid="link-admin">
+                  <Button 
+                    variant={location === "/admin" ? "default" : "ghost"}
+                    size="sm"
+                  >
+                    Admin
+                  </Button>
+                </Link>
               </div>
             )}
           </div>

@@ -17,8 +17,10 @@ export const getSessionId = (): string | null => {
   return sessionId;
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `/api${endpoint}`;
+  const url = `${API_BASE}/api${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -112,7 +114,7 @@ export const chat = {
     });
 
     const sessionId = getSessionId();
-    const response = await fetch('/api/chat/message', {
+    const response = await fetch(`${API_BASE}/api/chat/message`, {
       method: 'POST',
       headers: {
         ...(sessionId && { 'x-session-id': sessionId }),
@@ -126,5 +128,84 @@ export const chat = {
     }
 
     return response.json();
+  }
+};
+
+// Admin API
+export const admin = {
+  // Device management
+  devices: {
+    list: async () => {
+      return apiRequest('/admin/devices');
+    },
+
+    create: async (deviceData: {
+      id: string;
+      name: string;
+      type: string;
+      ip: string;
+    }) => {
+      return apiRequest('/admin/devices', {
+        method: 'POST',
+        body: JSON.stringify(deviceData),
+      });
+    },
+
+    update: async (deviceId: string, deviceData: Partial<{
+      name: string;
+      type: string;
+      ip: string;
+      status: string;
+    }>) => {
+      return apiRequest(`/admin/devices/${deviceId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(deviceData),
+      });
+    },
+
+    delete: async (deviceId: string) => {
+      return apiRequest(`/admin/devices/${deviceId}`, {
+        method: 'DELETE',
+      });
+    }
+  },
+
+  // Service management
+  services: {
+    list: async () => {
+      return apiRequest('/admin/services');
+    },
+
+    create: async (serviceData: {
+      name: string;
+      type: string;
+      endpoint?: string;
+      status?: string;
+      config?: Record<string, any>;
+    }) => {
+      return apiRequest('/admin/services', {
+        method: 'POST',
+        body: JSON.stringify(serviceData),
+      });
+    },
+
+    update: async (serviceId: string, serviceData: Partial<{
+      name: string;
+      type: string;
+      endpoint: string;
+      status: string;
+      config: Record<string, any>;
+    }>) => {
+      return apiRequest(`/admin/services/${serviceId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(serviceData),
+      });
+    },
+
+    delete: async (serviceId: string) => {
+      return apiRequest(`/admin/services/${serviceId}`, {
+        method: 'DELETE',
+      });
+    }
   }
 };
