@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
@@ -6,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navigation } from "@/components/Navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
+import { useDevices } from "@/hooks/useDevices";
 
 // Pages
 import Home from "@/pages/Home";
@@ -15,59 +16,38 @@ import Chat from "@/pages/Chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const [user, setUser] = useState<any>(null);
-  const [connectedDevice, setConnectedDevice] = useState<string | null>(null);
-
-  const handleLogin = (userData: any) => {
-    console.log('User logged in:', userData);
-    setUser(userData);
-  };
-
-  const handleLogout = () => {
-    console.log('User logged out');
-    setUser(null);
-    setConnectedDevice(null);
-  };
-
-  const handleDeviceConnect = (deviceId: string) => {
-    console.log('Device connected:', deviceId);
-    setConnectedDevice(deviceId);
-  };
-
-  const handleDeviceDisconnect = (deviceId: string) => {
-    console.log('Device disconnected:', deviceId);
-    setConnectedDevice(null);
-  };
+  const { user, login, oidcLogin, logout, isAuthenticated } = useAuth();
+  const { connectedDevice, connectDevice, disconnectDevice } = useDevices(isAuthenticated);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation
-        isAuthenticated={!!user}
+        isAuthenticated={isAuthenticated}
         deviceConnected={!!connectedDevice}
-        onLogout={handleLogout}
+        onLogout={logout}
       />
       
       <main>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/login">
-            <Login onLogin={handleLogin} />
+            <Login onLogin={login} onOIDCLogin={oidcLogin} />
           </Route>
           <Route path="/devices">
-            {user ? (
+            {isAuthenticated ? (
               <Devices
-                onDeviceConnect={handleDeviceConnect}
-                onDeviceDisconnect={handleDeviceDisconnect}
+                onDeviceConnect={connectDevice}
+                onDeviceDisconnect={disconnectDevice}
               />
             ) : (
-              <Login onLogin={handleLogin} />
+              <Login onLogin={login} onOIDCLogin={oidcLogin} />
             )}
           </Route>
           <Route path="/chat">
-            {user ? (
-              <Chat deviceConnected={!!connectedDevice} />
+            {isAuthenticated ? (
+              <Chat deviceConnected={!!connectedDevice} connectedDeviceId={connectedDevice} />
             ) : (
-              <Login onLogin={handleLogin} />
+              <Login onLogin={login} onOIDCLogin={oidcLogin} />
             )}
           </Route>
           <Route component={NotFound} />

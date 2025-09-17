@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { useDevices } from "@/hooks/useDevices";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Cpu, 
   Wifi, 
@@ -18,93 +20,38 @@ import {
   Thermometer
 } from "lucide-react";
 
-interface Device {
-  id: string;
-  name: string;
-  type: "raspberry-pi" | "jetson" | "coral" | "ncs";
-  status: "connected" | "disconnected" | "connecting";
-  ip: string;
-  specs: {
-    cpu: string;
-    memory: string;
-    temperature: number;
-    usage: number;
-  };
-}
-
 interface DeviceConnectionProps {
-  onConnect?: (deviceId: string) => void;
-  onDisconnect?: (deviceId: string) => void;
+  onConnect?: (deviceId: string) => Promise<void>;
+  onDisconnect?: (deviceId: string) => Promise<void>;
 }
 
 export function DeviceConnection({ onConnect, onDisconnect }: DeviceConnectionProps) {
-  const [scanning, setScanning] = useState(false);
   const [manualIP, setManualIP] = useState("");
-  
-  // Mock device data - todo: remove mock functionality
-  const [devices] = useState<Device[]>([
-    {
-      id: "rpi-001",
-      name: "Raspberry Pi 4B",
-      type: "raspberry-pi",
-      status: "disconnected",
-      ip: "192.168.1.100",
-      specs: {
-        cpu: "ARM Cortex-A72",
-        memory: "4GB RAM",
-        temperature: 45,
-        usage: 23
-      }
-    },
-    {
-      id: "jetson-001", 
-      name: "NVIDIA Jetson Nano",
-      type: "jetson",
-      status: "connected",
-      ip: "192.168.1.101",
-      specs: {
-        cpu: "ARM Cortex-A57",
-        memory: "4GB RAM",
-        temperature: 52,
-        usage: 67
-      }
-    },
-    {
-      id: "coral-001",
-      name: "Google Coral Dev Board",
-      type: "coral", 
-      status: "disconnected",
-      ip: "192.168.1.102",
-      specs: {
-        cpu: "ARM Cortex-A53",
-        memory: "1GB RAM",
-        temperature: 38,
-        usage: 12
-      }
-    }
-  ]);
+  const { isAuthenticated } = useAuth();
+  const { 
+    devices, 
+    loading, 
+    scanning, 
+    scanDevices, 
+    connectDevice, 
+    disconnectDevice 
+  } = useDevices(isAuthenticated);
 
   const handleScan = async () => {
-    setScanning(true);
-    console.log('Scanning for devices...');
-    // todo: remove mock functionality - simulate scanning delay
-    setTimeout(() => {
-      setScanning(false);
-      console.log('Scan completed');
-    }, 2000);
+    await scanDevices();
   };
 
-  const handleConnect = (deviceId: string) => {
-    console.log(`Connecting to device ${deviceId}...`);
-    onConnect?.(deviceId);
+  const handleConnect = async (deviceId: string) => {
+    await connectDevice(deviceId);
+    await onConnect?.(deviceId);
   };
 
-  const handleDisconnect = (deviceId: string) => {
-    console.log(`Disconnecting from device ${deviceId}...`);
-    onDisconnect?.(deviceId);
+  const handleDisconnect = async (deviceId: string) => {
+    await disconnectDevice(deviceId);
+    await onDisconnect?.(deviceId);
   };
 
-  const getDeviceIcon = (type: Device['type']) => {
+  const getDeviceIcon = (type: string) => {
     switch (type) {
       case 'raspberry-pi': return '🔴';
       case 'jetson': return '🟢';

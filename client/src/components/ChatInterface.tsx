@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Send, 
   Image, 
@@ -13,63 +15,35 @@ import {
   User, 
   Bot,
   Upload,
-  X
+  X,
+  Loader2
 } from "lucide-react";
-
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  images?: string[];
-  debug?: {
-    systemPrompt?: string;
-    modelInputs?: Record<string, any>;
-    modelOutputs?: Record<string, any>;
-    processingTime?: number;
-  };
-}
 
 interface ChatInterfaceProps {
   deviceConnected?: boolean;
+  deviceId?: string | null;
   debugMode?: boolean;
   onToggleDebug?: () => void;
-  onSendMessage?: (message: string, images?: File[]) => void;
   onTakePhoto?: () => void;
 }
 
 export function ChatInterface({ 
   deviceConnected = false, 
+  deviceId,
   debugMode = false, 
   onToggleDebug, 
-  onSendMessage,
   onTakePhoto 
 }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Mock messages - todo: remove mock functionality
-  const [messages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! I'm running on your edge device. How can I help you today?",
-      timestamp: new Date(),
-      debug: {
-        systemPrompt: "You are a helpful AI assistant running on an edge device. Provide concise and accurate responses.",
-        modelInputs: { temperature: 0.7, max_tokens: 150 },
-        modelOutputs: { tokens_generated: 23, confidence: 0.94 },
-        processingTime: 245
-      }
-    }
-  ]);
+  const { isAuthenticated } = useAuth();
+  const { messages, loading, sending, sendMessage } = useChat(deviceId, isAuthenticated);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim() && images.length === 0) return;
     
-    console.log('Sending message:', { message, images: images.length });
-    onSendMessage?.(message, images);
+    await sendMessage(message, images, debugMode);
     
     setMessage("");
     setImages([]);
@@ -131,7 +105,7 @@ export function ChatInterface({
                       {msg.role === 'user' ? 'You' : 'AI Assistant'}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {msg.timestamp.toLocaleTimeString()}
+                      {msg.createdAt.toLocaleTimeString()}
                     </span>
                   </div>
                   
@@ -263,11 +237,15 @@ export function ChatInterface({
           
           <Button
             onClick={handleSend}
-            disabled={!deviceConnected || (!message.trim() && images.length === 0)}
+            disabled={!deviceConnected || (!message.trim() && images.length === 0) || sending}
             className="self-end"
             data-testid="button-send-message"
           >
-            <Send className="h-4 w-4" />
+            {sending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </div>
         

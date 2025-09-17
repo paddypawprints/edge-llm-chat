@@ -1,21 +1,15 @@
-import { useState } from "react";
+import { useDevices } from "@/hooks/useDevices";
+import { useAuth } from "@/hooks/useAuth";
 import { DeviceConnection } from "@/components/DeviceConnection";
 
 interface DevicesProps {
-  onDeviceConnect?: (deviceId: string) => void;
-  onDeviceDisconnect?: (deviceId: string) => void;
+  onDeviceConnect?: (deviceId: string) => Promise<void>;
+  onDeviceDisconnect?: (deviceId: string) => Promise<void>;
 }
 
 export default function Devices({ onDeviceConnect, onDeviceDisconnect }: DevicesProps) {
-  const handleConnect = (deviceId: string) => {
-    console.log('Connecting to device:', deviceId);
-    onDeviceConnect?.(deviceId);
-  };
-
-  const handleDisconnect = (deviceId: string) => {
-    console.log('Disconnecting from device:', deviceId);
-    onDeviceDisconnect?.(deviceId);
-  };
+  const { isAuthenticated } = useAuth();
+  const { devices, loading, scanning, scanDevices } = useDevices(isAuthenticated);
 
   return (
     <div className="container mx-auto p-6">
@@ -27,8 +21,8 @@ export default function Devices({ onDeviceConnect, onDeviceDisconnect }: Devices
       </div>
       
       <DeviceConnection
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
+        onConnect={onDeviceConnect}
+        onDisconnect={onDeviceDisconnect}
       />
     </div>
   );

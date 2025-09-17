@@ -3,38 +3,41 @@ import { useLocation } from "wouter";
 import { LoginForm } from "@/components/LoginForm";
 
 interface LoginProps {
-  onLogin?: (user: any) => void;
+  onLogin?: (email: string, password: string) => Promise<any>;
+  onOIDCLogin?: (provider: string) => Promise<any>;
 }
 
-export default function Login({ onLogin }: LoginProps) {
+export default function Login({ onLogin, onOIDCLogin }: LoginProps) {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (email: string, password: string) => {
-    setLoading(true);
-    setError("");
-
-    // Simulate login delay - todo: remove mock functionality
-    setTimeout(() => {
-      console.log('Login successful:', { email });
-      onLogin?.({ email, name: email.split('@')[0] });
+    try {
+      setLoading(true);
+      setError("");
+      
+      await onLogin?.(email, password);
       setLocation('/devices');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleOIDCLogin = async (provider: string) => {
-    setLoading(true);
-    setError("");
-
-    // Simulate OIDC flow - todo: remove mock functionality
-    setTimeout(() => {
-      console.log('OIDC login successful:', { provider });
-      onLogin?.({ email: `user@${provider}.com`, name: 'Demo User', provider });
+    try {
+      setLoading(true);
+      setError("");
+      
+      await onOIDCLogin?.(provider);
       setLocation('/devices');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
