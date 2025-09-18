@@ -1,7 +1,26 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
+name = "independent-research-edge-ai"
+version = "1.0.0"
+description = "Edge AI platform for LLM chat on edge devices"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Independent Research", email = "contact@independent-research.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["edge-ai", "llm", "chat", "edge-computing", "ai"]
 requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.16.5",
@@ -17,3 +36,10 @@ dependencies = [
     "uvicorn[standard]>=0.35.0",
     "email-validator>=2.3.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md", "*.yml", "*.yaml", "*.json"]

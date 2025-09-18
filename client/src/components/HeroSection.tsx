@@ -2,31 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Cpu, Zap, Shield, Brain } from "lucide-react";
+import { Cpu, Zap, Shield, Brain, DollarSign, Wifi, MessageSquare, TrendingDown } from "lucide-react";
 import heroImage from "@assets/generated_images/Edge_computing_hero_background_74e759e8.png";
 import devicesImage from "@assets/generated_images/Edge_device_product_showcase_f3c3664d.png";
 
 export function HeroSection() {
   const features = [
     {
-      icon: Brain,
-      title: "Advanced LLMs",
-      description: "Run sophisticated language models directly on your edge devices"
+      icon: Wifi,
+      title: "Works Offline",
+      description: "When connectivity fails or latency is critical, your AI keeps working locally"
     },
     {
-      icon: Cpu,
-      title: "Edge Computing",
-      description: "Optimized for Raspberry Pi, NVIDIA Jetson, and other edge platforms"
+      icon: MessageSquare,
+      title: "No-Code AI Behavior",
+      description: "Configure vision-language models with simple English—no data scientists or programming required"
     },
     {
-      icon: Zap,
-      title: "Real-time Processing",
-      description: "Lightning-fast inference with minimal latency for instant responses"
+      icon: DollarSign,
+      title: "Zero Incremental Cost",
+      description: "Pay only for your edge device—no expensive foundation model API calls or cloud computing costs"
     },
     {
-      icon: Shield,
-      title: "Private & Secure",
-      description: "Keep your data local with on-device processing and privacy protection"
+      icon: TrendingDown,
+      title: "Fixed Cost Scaling",
+      description: "Make unlimited AI calls for the cost of your device, while cloud costs increase with every request"
     }
   ];
 
@@ -43,17 +43,17 @@ export function HeroSection() {
         
         <div className="relative z-10 container mx-auto px-4 text-center">
           <Badge variant="secondary" className="mb-4" data-testid="badge-hero">
-            Cutting-edge AI Technology
+            Zero-Cost AI · No Cloud Dependencies
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto">
-            Large Language Models for 
-            <span className="text-primary block mt-2">Edge Devices</span>
+            AI That Works
+            <span className="text-primary block mt-2">Without the Cloud</span>
           </h1>
           
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Deploy powerful AI directly on Raspberry Pi, NVIDIA Jetson, and other edge devices. 
-            Experience the future of distributed artificial intelligence.
+            Run powerful vision-language models locally when connectivity fails or latency matters. 
+            Set AI behavior with simple English instructions—no data scientists or expensive API calls required.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -72,9 +72,13 @@ export function HeroSection() {
       {/* Features Section */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose Edge AI?
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Why Edge AI Changes Everything
           </h2>
+          <p className="text-lg text-muted-foreground text-center mb-12 max-w-3xl mx-auto">
+            Traditional cloud AI creates dependencies, increases costs with usage, and requires expensive expertise. 
+            Edge AI breaks these constraints with local processing that scales at zero incremental cost.
+          </p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {features.map((feature, index) => (
